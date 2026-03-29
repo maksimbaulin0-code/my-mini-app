@@ -109,4 +109,322 @@
         .days {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 0; /* У
+            gap: 0; /* Убираем отступы между днями */
+            position: relative;
+        }
+
+        /* Тонкие разделительные линии (абсолютно точные) */
+        .days::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0; top: 0;
+            height: 1px;
+            background-color: var(--border-color);
+            z-index: 1;
+        }
+
+        .day {
+            aspect-ratio: 1; /* Квадратный день */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--text-color);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Тонкие разделительные линии для каждого дня */
+        .day::after {
+            content: '';
+            position: absolute;
+            left: 0; right: 0; bottom: 0;
+            height: 1px;
+            background-color: var(--border-color);
+        }
+
+        /* Точки событий (как в iOS) */
+        .event-dot {
+            width: 5px;
+            height: 5px;
+            background-color: #30d158; /* Зеленая точка */
+            border-radius: 50%;
+            position: absolute;
+            bottom: 6px;
+        }
+
+        /* Выключенные дни (прошлые или чужие) */
+        .day.disabled {
+            opacity: 0.2;
+            cursor: not-allowed;
+        }
+
+        /* Чужой месяц */
+        .day.other-month { opacity: 0; pointer-events: none; }
+
+        /* Сегодня (красный фон, как в iOS) */
+        .day.today {
+            color: white;
+            font-weight: bold;
+        }
+
+        .day.today::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: var(--today-bg);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        /* Выбранный день (стиль ZARUB, фиолетовый) */
+        .day.selected {
+            color: white;
+            font-weight: bold;
+        }
+
+        .day.selected::before {
+            content: '';
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: var(--selected-bg);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        /* Если сегодня выбрано, фон остается красным, но меняется шрифт */
+        .day.today.selected::before {
+            background-color: var(--today-bg);
+        }
+
+        /* 3. Блок Выбора Услуги */
+        .service-select-card {
+            background-color: var(--input-bg);
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--hint-color);
+        }
+
+        select {
+            width: 100%;
+            background-color: transparent;
+            border: none;
+            color: white;
+            padding: 5px 0;
+            font-size: 17px;
+            appearance: none;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        /* 4. Кнопка внизу */
+        .confirm-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background-color: #bf5af2; /* Фиолетовый (стиль ZARUB) */
+            color: white;
+            border: none;
+            padding: 18px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            box-shadow: 0 4px 15px rgba(191,90,242,0.4);
+        }
+
+        .confirm-btn:active { opacity: 0.8; }
+        .confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="ios-nav">
+            <div class="back-year"><i class="fa fa-chevron-left"></i> 2026</div>
+            <div class="ios-icon-group">
+                <i class="fa fa-magnifying-glass"></i>
+                <i class="fa fa-plus"></i>
+            </div>
+        </div>
+
+        <div class="calendar-section">
+            <div class="weekdays">
+                <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
+            </div>
+            
+            <div id="months-scroll" class="months-scroll">
+                </div>
+        </div>
+
+        <div id="service-section" class="service-select-card" style="display: none;">
+            <div class="section-title">2. Услуга и Время <span id="selected-date-text"></span></div>
+            <select id="service-select">
+                <option value="recording_1">Запись вокала (1 час) - 1500₽</option>
+                <option value="mixing">Сведение трека - от 3000₽</option>
+                <option value="recording_2">Аренда студии (2 часа) - 2500₽</option>
+            </select>
+        </div>
+
+    </div>
+
+    <button id="confirm-btn" class="confirm-btn" style="display: none;">Записаться</button>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <script>
+        // Инициализация Telegram TMA
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+
+        // 1. ЛОГИКА КАЛЕНДАРЯ iOS (Бесконечная прокрутка)
+        const monthsScroll = document.getElementById('months-scroll');
+        const serviceSection = document.getElementById('service-section');
+        const selectedDateText = document.getElementById('selected-date-text');
+        const confirmBtn = document.getElementById('confirm-btn');
+
+        let selectedDate = null;
+        let monthsLoadedCount = 0;
+
+        // Определяем "сегодня" из твоего скриншота
+        const fakeToday = new Date(2026, 2, 29); // 29 Марта 2026
+        fakeToday.setHours(0,0,0,0);
+
+        // Фейковые события для теста (как зеленые точки)
+        const eventsDates = [
+            new Date(2026, 2, 19).getTime(),
+            new Date(2026, 2, 23).getTime(),
+            new Date(2026, 2, 22).getTime()
+        ];
+
+        function createMonthBlock(year, monthIndex) {
+            const block = document.createElement('div');
+            block.classList.add('month-block');
+
+            const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
+            const header = document.createElement('div');
+            header.classList.add('month-header');
+            header.innerText = monthNames[monthIndex];
+            block.appendChild(header);
+
+            const daysGrid = document.createElement('div');
+            daysGrid.classList.add('days');
+
+            const firstDay = new Date(year, monthIndex, 1).getDay();
+            const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+            const prevDaysInMonth = new Date(year, monthIndex, 0).getDate();
+
+            let startingDay = firstDay === 0 ? 6 : firstDay - 1; // Сдвиг для Пн-Вс
+
+            // Пустые дни прошлого месяца (invisible)
+            for (let i = startingDay; i > 0; i--) {
+                const dayEl = document.createElement('div');
+                dayEl.classList.add('day', 'other-month');
+                daysGrid.appendChild(dayEl);
+            }
+
+            // Дни текущего месяца
+            for (let i = 1; i <= daysInMonth; i++) {
+                const dayEl = document.createElement('div');
+                dayEl.classList.add('day');
+                dayEl.innerText = i;
+
+                const thisDate = new Date(year, monthIndex, i);
+                thisDate.setHours(0,0,0,0);
+
+                // Сегодня (КРАСНЫЙ ФОН)
+                if (thisDate.getTime() === fakeToday.getTime()) {
+                    dayEl.classList.add('today');
+                }
+
+                // Запрет на прошлые дни (opacity 0.2)
+                if (thisDate < fakeToday) {
+                    dayEl.classList.add('disabled');
+                } else {
+                    // Точки событий (зеленые)
+                    if (eventsDates.includes(thisDate.getTime())) {
+                        const dot = document.createElement('div');
+                        dot.classList.add('event-dot');
+                        dayEl.appendChild(dot);
+                    }
+                    
+                    // Выбор дня
+                    dayEl.addEventListener('click', () => selectDay(dayEl, thisDate));
+                }
+
+                // Выделение выбранного дня (ФИОЛЕТОВЫЙ ФОН)
+                if (selectedDate && thisDate.getTime() === selectedDate.getTime()) {
+                    dayEl.classList.add('selected');
+                }
+
+                daysGrid.appendChild(dayEl);
+            }
+            
+            block.appendChild(daysGrid);
+            return block;
+        }
+
+        function loadInitialMonths() {
+            // Грузим 3 месяца подряд (Март, Апрель, Май)
+            for (let i = 0; i < 3; i++) {
+                const year = fakeToday.getFullYear();
+                const month = fakeToday.getMonth() + i;
+                const finalYear = year + Math.floor(month / 12);
+                const finalMonth = month % 12;
+                monthsScroll.appendChild(createMonthBlock(finalYear, finalMonth));
+            }
+        }
+
+        // Выбор дня
+        function selectDay(element, date) {
+            // Убираем старый выбор
+            document.querySelectorAll('.day.selected').forEach(el => el.classList.remove('selected'));
+            // Добавляем новый
+            element.classList.add('selected');
+            selectedDate = date;
+            
+            // Показываем секцию услуги и кнопку
+            serviceSection.style.display = 'flex';
+            confirmBtn.style.display = 'block';
+            
+            const dayNames = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+            selectedDateText.innerText = `(${date.getDate()}.${date.getMonth()+1}, ${dayNames[date.getDay()]})`;
+            
+            confirmBtn.innerText = `Записаться на ${date.getDate()}.${date.getMonth()+1}`;
+            
+            // Вибрация 'heavy' для подтверждения выбора
+            tg.HapticFeedback.impactOccurred('heavy');
+        }
+
+        // Кнопка Записаться
+        confirmBtn.addEventListener('click', () => {
+            tg.HapticFeedback.notificationOccurred('success');
+            const service = document.getElementById('service-select').options[document.getElementById('service-select').selectedIndex].text;
+            const dateStr = `${selectedDate.getDate()}.${selectedDate.getMonth()+1}`;
+            
+            tg.showAlert(`✅ Запись подтверждена!\n${service}\nДата: ${dateStr}`);
+        });
+
+        // Старт
+        loadInitialMonths();
+
+    </script>
+</body>
+</html>
