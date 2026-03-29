@@ -3,26 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Studio Recording Booking</title>
+    <title>Studio Booking iOS Style</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/michelegera/sf-pro-web-font@master/stylesheet.css">
     <style>
-        /* Переменные для цветов (стиль ZARUB + Studio) */
+        /* Переменные для точных цветов iOS (темная тема) */
         :root {
             --bg-color: #000000;
             --text-color: #ffffff;
-            --card-bg: #1c1c1e;
-            --hint-color: #a0a0a5;
-            --blue-gradient: linear-gradient(135deg, #2481cc 0%, #0c203b 100%);
-            --orange-gradient: linear-gradient(135deg, #ff9f0a 0%, #d35400 100%);
-            --button-main: #2481cc;
-            --input-bg: #101010;
+            --hint-color: #8e8e93;
+            --red-color: #ff3b30;
+            --selected-bg: #bf5af2;
+            --input-bg: #1c1c1e;
             --border-color: #2c2c2e;
-            --selected-day: #bf5af2; /* Фиолетовый для выбранного дня */
+            --today-bg: #ff3b30;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             margin: 0;
@@ -34,436 +32,81 @@
 
         .app-container {
             width: 100%;
-            padding: 20px;
+            padding: 10px 15px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 25px;
+            gap: 20px;
         }
 
-        /* 1. Хедер */
-        .header {
+        /* 1. Блок навигации (как в iOS) */
+        .ios-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 44px;
+            padding: 0 5px;
         }
 
-        .studio-logo {
-            font-weight: bold;
-            font-size: 24px;
-            background: var(--blue-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .profile-btn {
-            background-color: var(--card-bg);
-            color: white;
-            border: 1px solid var(--border-color);
-            padding: 8px 15px;
-            border-radius: 10px;
-            font-size: 14px;
+        .back-year {
+            color: var(--red-color);
+            font-size: 17px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        /* 2. Блок Выбора Студии/Услуги */
-        .service-select-card {
-            background-color: var(--card-bg);
-            border-radius: 15px;
-            padding: 20px;
+        .ios-icon-group {
+            display: flex;
+            gap: 15px;
+            color: var(--red-color);
+            font-size: 20px;
+        }
+
+        /* 2. НАШ КАЛЕНДАРЬ В СТИЛЕ IOS (Бесконечная прокрутка) */
+        .calendar-section {
             display: flex;
             flex-direction: column;
-            gap: 15px;
         }
 
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .select-wrapper {
-            position: relative;
-        }
-
-        select {
-            width: 100%;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            font-size: 16px;
-            appearance: none;
-            cursor: pointer;
-        }
-
-        .select-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--hint-color);
-            pointer-events: none;
-        }
-
-        /* 3. ПОЛНОЦЕННЫЙ КАЛЕНДАРЬ */
-        .calendar-card {
-            background-color: var(--card-bg);
-            border-radius: 15px;
-            padding: 15px;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .month-name { font-weight: 600; font-size: 18px; }
-
-        .nav-btn {
-            background: none;
-            border: none;
-            color: var(--button-main);
-            font-size: 18px;
-            cursor: pointer;
-        }
-
+        /* Дни недели Пн-Вс */
         .weekdays {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             text-align: center;
             color: var(--hint-color);
             font-size: 12px;
-            margin-bottom: 5px;
+            font-weight: 500;
+            text-transform: lowercase;
+            padding-bottom: 10px;
+            position: sticky; /* Прилипает к верху при прокрутке */
+            top: 0;
+            background-color: var(--bg-color);
+            z-index: 10;
         }
 
+        /* Контейнер для месяцев */
+        .months-scroll {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Блок одного месяца */
+        .month-block {
+            padding-bottom: 30px;
+        }
+
+        /* Заголовок Месяца («Март», «Апрель») */
+        .month-header {
+            font-size: 34px;
+            font-weight: bold;
+            color: var(--text-color);
+            margin: 15px 0 20px 0;
+        }
+
+        /* Сетка дней */
         .days {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
-        }
-
-        .day {
-            aspect-ratio: 1; /* Квадратный день */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            color: var(--hint-color);
-            transition: background 0.2s;
-        }
-
-        /* Выключенные дни (прошлые) */
-        .day.disabled {
-            opacity: 0.2;
-            cursor: not-allowed;
-        }
-
-        /* Текущий месяц, активные дни */
-        .day.current-month { color: white; }
-
-        /* Сегодняшний день */
-        .day.today { border: 1px solid var(--button-main); color: var(--button-main); font-weight: bold; }
-
-        /* Выбранный день */
-        .day.selected { background-color: var(--selected-day); color: white; font-weight: bold; }
-
-        /* 4. Блок Выбора Времени */
-        .time-select-card {
-            background-color: var(--card-bg);
-            border-radius: 15px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .time-slots {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-
-        .time-slot {
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 14px;
-            text-align: center;
-            cursor: pointer;
-            transition: background 0.2s, border-color 0.2s;
-        }
-
-        .time-slot:active { transform: scale(0.98); }
-        .time-slot.selected { background-color: var(--button-main); border-color: var(--button-main); font-weight: bold; }
-        .time-slot.booked { opacity: 0.3; cursor: not-allowed; text-decoration: line-through; }
-
-        /* 5. Кнопка внизу */
-        .confirm-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background-color: var(--button-main);
-            color: white;
-            border: none;
-            padding: 18px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(36,129,204,0.4);
-            transition: opacity 0.2s;
-        }
-
-        .confirm-btn:active { opacity: 0.8; }
-        .confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    </style>
-</head>
-<body>
-
-    <div class="app-container">
-        <div class="header">
-            <div class="studio-logo">StudioRec</div>
-            <button class="profile-btn"><i class="fa fa-user-circle"></i> Мои записи</button>
-        </div>
-
-        <div class="service-select-card">
-            <div class="section-title">1. Выбери услугу</div>
-            <div class="select-wrapper">
-                <select id="service-select">
-                    <option value="recording">Запись вокала (1 час) - 1500₽</option>
-                    <option value="mixing">Сведение трека - от 3000₽</option>
-                    <option value="podcast">Запись подкаста - 2000₽/час</option>
-                    <option value="rent">Аренда студии (без инженера) - 1000₽/час</option>
-                </select>
-                <i class="fa fa-chevron-down select-icon"></i>
-            </div>
-        </div>
-
-        <div class="calendar-card">
-            <div class="calendar-header">
-                <button id="prev-month" class="nav-btn"><i class="fa fa-chevron-left"></i></button>
-                <div id="month-name" class="month-name">Октябрь 2023</div>
-                <button id="next-month" class="nav-btn"><i class="fa fa-chevron-right"></i></button>
-            </div>
-
-            <div class="weekdays">
-                <div>Пн</div><div>Вт</div><div>Ср</div><div>Чт</div><div>Пт</div><div>Сб</div><div>Вс</div>
-            </div>
-
-            <div id="calendar-days" class="days">
-                </div>
-        </div>
-
-        <div id="time-section" class="time-select-card" style="display: none;">
-            <div class="section-title">2. Выбери время <span id="selected-date-text" style="color: var(--hint-color); font-size: 14px;"></span></div>
-            <div id="time-slots" class="time-slots">
-                </div>
-        </div>
-
-    </div>
-
-    <button id="confirm-btn" class="confirm-btn" disabled>Записаться</button>
-
-    <script>
-        // Инициализация Telegram TMA
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
-
-        // 1. ЛОГИКА КАЛЕНДАРЯ
-        const calendarDays = document.getElementById('calendar-days');
-        const monthName = document.getElementById('month-name');
-        const prevMonthBtn = document.getElementById('prev-month');
-        const nextMonthBtn = document.getElementById('next-month');
-
-        const timeSection = document.getElementById('time-section');
-        const timeSlots = document.getElementById('time-slots');
-        const selectedDateText = document.getElementById('selected-date-text');
-        const confirmBtn = document.getElementById('confirm-btn');
-
-        let currentDate = new Date();
-        let selectedDate = null;
-        let selectedTime = null;
-
-        function renderCalendar() {
-            calendarDays.innerHTML = '';
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-
-            const monthNames = ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"];
-            monthName.innerText = `${monthNames[month]} ${year}`;
-
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            const prevDaysInMonth = new Date(year, month, 0).getDate();
-
-            const today = new Date();
-            today.setHours(0,0,0,0);
-
-            // Пустые дни прошлого месяца (Ср, Чт, Пт...)
-            let startingDay = firstDay === 0 ? 6 : firstDay - 1; // Сдвиг для Пн-Вс
-
-            for (let i = startingDay; i > 0; i--) {
-                const dayEl = document.createElement('div');
-                dayEl.classList.add('day', 'disabled');
-                dayEl.innerText = prevDaysInMonth - i + 1;
-                calendarDays.appendChild(dayEl);
-            }
-
-            // Дни текущего месяца
-            for (let i = 1; i <= daysInMonth; i++) {
-                const dayEl = document.createElement('div');
-                dayEl.classList.add('day', 'current-month');
-                dayEl.innerText = i;
-
-                const thisDate = new Date(year, month, i);
-                thisDate.setHours(0,0,0,0);
-
-                // Сегодня
-                if (thisDate.getTime() === today.getTime()) {
-                    dayEl.classList.add('today');
-                }
-
-                // Запрет на прошлые дни
-                if (thisDate < today) {
-                    dayEl.classList.add('disabled');
-                } else {
-                    // Выбор дня
-                    dayEl.addEventListener('click', () => selectDay(dayEl, thisDate));
-                }
-
-                // Выделение выбранного дня
-                if (selectedDate && thisDate.getTime() === selectedDate.getTime()) {
-                    dayEl.classList.add('selected');
-                }
-
-                calendarDays.appendChild(dayEl);
-            }
-
-            // Пустые дни следующего месяца (до конца недели)
-            let totalDays = startingDay + daysInMonth;
-            for (let i = 1; i <= (7 - (totalDays % 7)) && totalDays % 7 !== 0; i++) {
-                const dayEl = document.createElement('div');
-                dayEl.classList.add('day', 'disabled');
-                dayEl.innerText = i;
-                calendarDays.appendChild(dayEl);
-            }
-        }
-
-        function selectDay(element, date) {
-            // Убираем старый выбор
-            document.querySelectorAll('.day.selected').forEach(el => el.classList.remove('selected'));
-            // Добавляем новый
-            element.classList.add('selected');
-            selectedDate = date;
-            selectedTime = null; // Сбрасываем время
-
-            // Показываем секцию времени
-            timeSection.style.display = 'flex';
-            const dayNames = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
-            selectedDateText.innerText = `(${date.getDate()}.${date.getMonth()+1}, ${dayNames[date.getDay()]})`;
-
-            renderTimeSlots();
-            updateConfirmButton();
-
-            // Легкая вибрация при выборе дня
-            tg.HapticFeedback.impactOccurred('light');
-        }
-
-        // 2. ЛОГИКА ВЫБОРА ВРЕМЕНИ
-        const availableSlots = ["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00"];
-        const bookedSlots = ["13:00", "14:00"]; // Фейковые брони для теста
-
-        function renderTimeSlots() {
-            timeSlots.innerHTML = '';
-            availableSlots.forEach(slot => {
-                const slotEl = document.createElement('div');
-                slotEl.classList.add('time-slot');
-                slotEl.innerText = slot;
-
-                if (bookedSlots.includes(slot)) {
-                    slotEl.classList.add('booked');
-                } else {
-                    slotEl.addEventListener('click', () => selectTime(slotEl, slot));
-                }
-
-                if (selectedTime === slot) {
-                    slotEl.classList.add('selected');
-                }
-
-                timeSlots.appendChild(slotEl);
-            });
-        }
-
-        function selectTime(element, time) {
-            // Убираем старый выбор
-            document.querySelectorAll('.time-slot.selected').forEach(el => el.classList.remove('selected'));
-            // Добавляем новый
-            element.classList.add('selected');
-            selectedTime = time;
-            updateConfirmButton();
-
-            // Легкая вибрация при выборе времени
-            tg.HapticFeedback.impactOccurred('light');
-        }
-
-        // 3. ОБЩАЯ ЛОГИКА
-        function updateConfirmButton() {
-            if (selectedDate && selectedTime) {
-                confirmBtn.disabled = false;
-                confirmBtn.innerText = `Записаться на ${selectedTime}`;
-            } else {
-                confirmBtn.disabled = true;
-                confirmBtn.innerText = `Записаться`;
-            }
-        }
-
-        // Навигация по месяцам
-        prevMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() - 1);
-            // Запрещаем уходить в прошлое дальше сегодня
-            if (currentDate < new Date().setHours(0,0,0,0)) {
-                currentDate = new Date();
-            }
-            renderCalendar();
-            tg.HapticFeedback.impactOccurred('light');
-        });
-
-        nextMonthBtn.addEventListener('click', () => {
-            currentDate.setMonth(currentDate.getMonth() + 1);
-            renderCalendar();
-            tg.HapticFeedback.impactOccurred('light');
-        });
-
-        // Кнопка Записаться
-        confirmBtn.addEventListener('click', () => {
-            tg.HapticFeedback.notificationOccurred('success');
-            const service = document.getElementById('service-select').options[document.getElementById('service-select').selectedIndex].text;
-            const dateStr = `${selectedDate.getDate()}.${selectedDate.getMonth()+1}`;
-
-            tg.showPopup({
-                title: 'Бронирование',
-                message: `Вы выбрали:\n${service}\nДата: ${dateStr}\nВремя: ${selectedTime}\n\nПодтвердить запись?`,
-                buttons: [
-                    {id: 'ok', type: 'default', text: 'Да!'},
-                    {type: 'cancel', text: 'Отмена'}
-                ]
-            });
-        });
-
-        // Старт
-        renderCalendar();
-
-    </script>
-</body>
-</html>
+            gap: 0; /* У
