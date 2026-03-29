@@ -3,18 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>TMA Pro Template</title>
+    <title>ZARUB Dashboard</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* CSS переменные для автоматической смены темы (светлая/темная) */
+        /* Переменные для точных цветов */
         :root {
-            --bg-color: var(--tg-theme-bg-color, #ffffff);
-            --text-color: var(--tg-theme-text-color, #000000);
-            --hint-color: var(--tg-theme-hint-color, #707579);
-            --link-color: var(--tg-theme-link-color, #2481cc);
-            --button-color: var(--tg-theme-button-color, #2481cc);
-            --button-text-color: var(--tg-theme-button-text-color, #ffffff);
-            --secondary-bg-color: var(--tg-theme-secondary-bg-color, #f4f4f5);
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --card-bg: #1c1c1e;
+            --hint-color: #a0a0a5;
+            --blue-gradient: linear-gradient(135deg, #2481cc 0%, #0c203b 100%);
+            --purple-gradient: linear-gradient(135deg, #bf5af2 0%, #442a5a 100%);
+            --button-main: #2481cc;
+            --input-bg: #101010;
         }
 
         body {
@@ -23,17 +25,12 @@
             color: var(--text-color);
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
-        /* Контейнер приложения */
         .app-container {
             width: 100%;
-            max-width: 600px;
             padding: 20px;
             box-sizing: border-box;
             display: flex;
@@ -41,105 +38,340 @@
             gap: 20px;
         }
 
-        /* Блок профиля */
-        .profile-card {
-            background-color: var(--secondary-bg-color);
-            border-radius: 12px;
-            padding: 15px;
+        /* 1. Хедер (Logo & Profile) */
+        .header {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            height: 40px;
         }
 
-        .avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: var(--button-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
+        .logo {
+            background-color: var(--button-main);
             color: white;
             font-weight: bold;
+            font-size: 20px;
+            padding: 8px 15px;
+            border-radius: 8px;
+            text-transform: uppercase;
         }
 
-        .user-info h2 { margin: 0; font-size: 18px; }
-        .user-info p { margin: 2px 0 0; font-size: 14px; color: var(--hint-color); }
+        .user-meta {
+            color: var(--hint-color);
+            font-size: 14px;
+        }
 
-        /* Поле ввода */
-        .input-group {
+        .profile-btn-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-btn {
+            background-color: white;
+            color: black;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* 2. Блок Балансов (Два градиентных блока) */
+        .balance-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .balance-card {
+            border-radius: 20px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
+            justify-content: space-between;
+            height: 120px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .balance-blue { background: var(--blue-gradient); }
+        .balance-purple { background: var(--purple-gradient); }
+
+        .card-top {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .amount {
+            font-size: 30px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+
+        .card-action {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            opacity: 0.8;
+            cursor: pointer;
+        }
+
+        /* 3. Горизонтальное меню (3 иконки) */
+        .main-menu {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+        }
+
+        .menu-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: 33%;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .menu-icon {
+            font-size: 22px;
+            color: var(--button-main);
+            background-color: var(--card-bg);
+            padding: 12px;
+            border-radius: 50%;
+        }
+
+        .menu-label {
+            font-size: 12px;
+            color: var(--hint-color);
+        }
+
+        /* 4. Секция Ваших Карт */
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .card-count {
+            background-color: #2c2c2e;
+            color: #2481cc;
+            font-size: 14px;
+            padding: 4px 10px;
+            border-radius: 5px;
+        }
+
+        /* Поле поиска */
+        .search-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-input {
+            flex-grow: 1;
+            background-color: var(--input-bg);
+            border: 1px solid #1c1c1e;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .search-filter {
+            background-color: var(--input-bg);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* 5. Карточка Visa */
+        .visa-card {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .visa-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-name-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .add-name-label {
+            font-size: 12px;
+            color: var(--hint-color);
+        }
+
+        .card-brand-num {
+            font-size: 18px;
+            display: flex;
+            align-items: baseline;
             gap: 8px;
         }
 
-        label { font-size: 14px; color: var(--hint-color); padding-left: 5px; }
+        .card-num-last { color: var(--hint-color); }
 
-        input[type="text"] {
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--secondary-bg-color);
-            background-color: var(--secondary-bg-color);
-            color: var(--text-color);
-            font-size: 16px;
-            outline: none;
-            transition: border-color 0.2s;
+        .visa-amount {
+            font-size: 28px;
+            font-weight: bold;
         }
 
-        input[type="text"]:focus { border-color: var(--button-color); }
+        /* Кнопки управления картой */
+        .card-controls {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
 
-        /* Кнопка */
-        .main-button {
-            background-color: var(--button-color);
-            color: var(--button-text-color);
+        .control-btn {
+            background-color: var(--input-bg);
+            color: white;
             border: none;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 10px;
             font-size: 16px;
-            font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s;
         }
 
-        .main-button:active { opacity: 0.8; }
-        .main-button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .control-btn:active { transform: scale(0.95); }
 
-        /* Статус отправки */
-        #status {
-            font-size: 14px;
-            text-align: center;
-            margin-top: 10px;
-            transition: color 0.2s;
+        /* Специальные цвета для кнопок из дизайна */
+        .btn-green { background-color: #30d158; }
+        .btn-purple { background-color: #bf5af2; }
+        .btn-blue { background-color: #2481cc; }
+        .btn-gray { background-color: #2c2c2e; }
+
+        /* 6. Промо-блок внизу */
+        .promo-block {
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto; /* Прижимаем к низу */
+            cursor: pointer;
         }
 
-        .status-success { color: #34c759; }
-        .status-error { color: #ff3b30; }
-        .status-loading { color: var(--hint-color); }
+        .promo-text {
+            font-size: 16px;
+            color: var(--text-color);
+        }
+
+        .visa-logo {
+            font-size: 20px;
+            color: white;
+            font-weight: bold;
+            font-style: italic;
+        }
 
     </style>
 </head>
 <body>
 
     <div class="app-container">
-        <div class="profile-card">
-            <div id="avatar" class="avatar">?</div>
-            <div class="user-info">
-                <h2 id="username">Пользователь</h2>
-                <p id="user-id">ID: ?</p>
+        <div class="header">
+            <div class="logo">ZARUB</div>
+            <div class="user-meta">ID: <span id="user-id-text">118217</span></div>
+            <div class="profile-btn-group">
+                <i class="fa fa-sync var(--hint-color)"></i>
+                <button class="profile-btn">Профиль</button>
             </div>
         </div>
 
-        <div class="input-group">
-            <label for="user-message">Напиши что-нибудь для n8n:</label>
-            <input type="text" id="user-message" placeholder="Твое сообщение...">
+        <div class="balance-group">
+            <div class="balance-card balance-blue">
+                <div class="card-top">
+                    <i class="fa fa-sack-dollar"></i> Баланс
+                </div>
+                <div class="amount">0,00 $</div>
+                <div class="card-action">
+                    <i class="fa fa-plus-circle"></i> Пополнить баланс
+                </div>
+            </div>
+            <div class="balance-card balance-purple">
+                <div class="card-top">
+                    <i class="fa fa-credit-card"></i> Баланс карт
+                </div>
+                <div class="amount">0,89 $</div>
+                <div class="card-action">
+                    <i class="fa fa-file-contract"></i> Выпустить карту
+                </div>
+            </div>
         </div>
 
-        <button id="send-btn" class="main-button" onclick="sendData()">Отправить в n8n</button>
-        
-        <p id="status"></p>
+        <div class="main-menu">
+            <div class="menu-item">
+                <i class="fa fa-headset menu-icon"></i>
+                <div class="menu-label">Техническая<br>поддержка</div>
+            </div>
+            <div class="menu-item">
+                <i class="fa fa-user-friends menu-icon"></i>
+                <div class="menu-label">Партнерская<br>программа</div>
+            </div>
+            <div class="menu-item">
+                <i class="fa fa-bell-concierge menu-icon"></i>
+                <div class="menu-label">Сервисы</div>
+            </div>
+        </div>
+
+        <div class="section-title">
+            Ваши карты <span class="card-count">1</span>
+        </div>
+
+        <div class="search-row">
+            <input type="text" class="search-input" placeholder="Поиск по имени карты...">
+            <div class="search-filter"><i class="fa fa-filter"></i></div>
+        </div>
+
+        <div class="visa-card">
+            <div class="visa-top">
+                <div class="card-name-group">
+                    <div class="add-name-label">Добавить название</div>
+                    <div class="card-brand-num">
+                        Visa <span class="card-num-last">*2142</span>
+                    </div>
+                </div>
+                <div class="visa-amount">0,89 $</div>
+            </div>
+            
+            <div class="card-controls">
+                <button class="control-btn btn-green"><i class="fa fa-download"></i></button>
+                <button class="control-btn btn-purple"><i class="fa fa-credit-card"></i></button>
+                <button class="control-btn btn-blue"><i class="fa fa-envelope"></i></button>
+                <button class="control-btn btn-gray"><i class="fa fa-times"></i></button>
+            </div>
+        </div>
+
+        <div class="promo-block">
+            <div class="promo-text">Выпустить карту</div>
+            <div class="visa-logo">VISA</div>
+        </div>
+
     </div>
 
     <script>
@@ -149,101 +381,30 @@
         // Разворачиваем приложение на весь экран
         tg.expand();
         
-        // Сообщаем Telegram, что мы готовы (убирает сплеш-скрин)
+        // Сообщаем Telegram, что мы готовы
         tg.ready();
 
-        // 1. Получаем данные пользователя из Telegram
+        // 1. Пытаемся получить реальный ID пользователя из Telegram
         const user = tg.initDataUnsafe.user;
-
         if (user) {
-            // Заполняем профиль
-            document.getElementById('username').innerText = `${user.first_name} ${user.last_name || ''}`;
-            document.getElementById('user-id').innerText = `ID: ${user.id}`;
-            
-            // Ставим первую букву имени в аватар
-            document.getElementById('avatar').innerText = user.first_name[0].toUpperCase();
-            
-            // Если есть username, добавляем
-            if (user.username) {
-                document.getElementById('user-id').innerText += ` (@${user.username})`;
-            }
+            // Если мы в Telegram, заменяем ID в хедере на реальный
+            document.getElementById('user-id-text').innerText = user.id;
         }
 
-        // 2. Настройка Главной Кнопки Telegram (MainButton)
-        tg.MainButton.text = "Закрыть приложение";
-        tg.MainButton.show();
-        tg.MainButton.onClick(() => {
-            tg.close(); // Закрываем TMA по нажатию
+        // 2. Пример того, как прикрутить логику к кнопкам
+        // (Сейчас они просто вибрируют)
+
+        document.querySelectorAll('.control-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Виброотклик при нажатии
+                tg.HapticFeedback.impactOccurred('medium');
+                // tg.showAlert('Кнопка нажата! Здесь будет логика управления картой.');
+            });
         });
 
-        // 3. Функция отправки данных в n8n
-        async function sendData() {
-            // === ВСТАВЬ СЮДА СВОЙ URL ИЗ N8N WEBHOOK ===
-            const N8N_WEBHOOK_URL = 'https://scarface.app.n8n.cloud/webhook-test/93718ce1-51b8-47e1-87e5-5d81ca6bb7b0'; 
-
-            const messageInput = document.getElementById('user-message');
-            const statusText = document.getElementById('status');
-            const sendBtn = document.getElementById('send-btn');
-
-            const message = messageInput.value.trim();
-
-            if (!message) {
-                tg.showAlert('Пожалуйста, напиши сообщение!');
-                return;
-            }
-
-            // Блокируем кнопку на время отправки
-            sendBtn.disabled = true;
-            statusText.innerText = 'Отправка...';
-            statusText.className = 'status-loading';
-
-            // Данные для отправки
-            const payload = {
-                user_id: user ? user.id : 'unknown',
-                first_name: user ? user.first_name : 'unknown',
-                username: user ? user.username : 'unknown',
-                message_text: message,
-                timestamp: new Date().toISOString()
-            };
-
-            try {
-                // Отправляем POST запрос в n8n
-                const response = await fetch(N8N_WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(payload),
-                });
-
-                if (response.ok) {
-                    // Успех
-                    statusText.innerText = '✅ Данные успешно отправлены!';
-                    statusText.className = 'status-success';
-                    messageInput.value = ''; // Очищаем поле
-                    
-                    // Виброотклик (Haptic Feedback) - успех
-                    tg.HapticFeedback.notificationOccurred('success');
-                    
-                    // Через 3 секунды убираем статус
-                    setTimeout(() => statusText.innerText = '', 3000);
-                } else {
-                    // Ошибка сервера
-                    throw new Error('Ошибка сервера n8n');
-                }
-            } catch (error) {
-                // Ошибка сети или другая
-                statusText.innerText = '❌ Ошибка при отправке. Попробуй позже.';
-                statusText.className = 'status-error';
-                console.error('Ошибка fetch:', error);
-                
-                // Виброотклик - ошибка
-                tg.HapticFeedback.notificationOccurred('error');
-            } finally {
-                // Разблокируем кнопку в любом случае
-                sendBtn.disabled = false;
-            }
-        }
+        // 3. Main Button (можно использовать как кнопку общего действия)
+        // tg.MainButton.text = "Создать новую карту";
+        // tg.MainButton.show();
 
     </script>
 </body>
