@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        button { padding: 10px 20px; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Привет! Это мое Mini App</h1>
+    <p id="user"></p>
+    <button onclick="sendToN8n()">Отправить данные в n8n</button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // Разворачиваем на весь экран
+        document.getElementById('user').innerText = "Привет, " + tg.initDataUnsafe.user.first_name;
+
+        function sendToN8n() {
+            // Сюда вставь URL твоего n8n Webhook
+            fetch('ТВОЙ_WEBHOOK_URL', {
+                method: 'POST',
+                body: JSON.stringify({ name: tg.initDataUnsafe.user.first_name, action: 'clicked_button' })
+            });
+            alert('Данные улетели в n8n!');
+        }
+    </script>
+</body>
+</html>
